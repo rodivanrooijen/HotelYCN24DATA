@@ -1,6 +1,5 @@
 import pandas as pd
 import logging
-import folium
 import plotly.express as px
 import string
 import numpy as np
@@ -10,8 +9,6 @@ logging.basicConfig(level=10)
 import sort_dataframeby_monthorweek as sd
 import mysql.connector
 import requests
-import urllib.parse
-import json
 from xgboost import XGBClassifier
 import re
 from sklearn.feature_selection import SelectKBest, f_classif

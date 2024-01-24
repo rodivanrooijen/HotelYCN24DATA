@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Booking.com web scraping</title>
+    <style>
+        body {
+            background-color: #f8f8f8; /* Light background color */
+            color: #333; /* Dark text color */
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            text-align: center;
+            padding: 20px;
+        }
+        h1 {
+            color: #000; /* Black header color */
+        }
+        img {
+            max-width: 100%; /* Make the image responsive */
+            margin-top: 20px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Add a subtle shadow to the image */
+        }
+        p {
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Booking.com web scraping</h1>
+    <img src="data:image/png;base64,{{ plot_base64 }}" alt="Plot Image">
+    <p>Gemiddelde Prijs: {{ gemiddelde_prijs }}</p>
+    <p>Modus Prijs: {{ modus_prijs }}</p>
+    <p>Mediaan Prijs: {{ mediaan_prijs }}</p>
+</body>
+</html>

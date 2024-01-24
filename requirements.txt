@@ -1,0 +1,7 @@
+fastapi
+uvicorn
+jinja2
+func-scraping
+pandas
+seaborn
+matplotlib

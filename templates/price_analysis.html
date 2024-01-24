@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Price Analysis</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
+    
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            height: 100vh;
+        }
+
+        #left-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-start;
+            padding: 20px;
+            margin-top: 1vh;
+        }
+
+        #right-section {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: left;
+            justify-content: flex-start;
+            padding: 20px;
+            margin-top: 5vh;
+        }
+
+        h1 {
+            margin-bottom: 50px;
+        }
+
+        select {
+            padding: 10px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            background-color: #fff;
+            color: #333;
+            width: 250px;
+            margin-top: 10px;
+        }
+
+        select:hover {
+            border-color: #555;
+        }
+
+        select:focus {
+            outline: none;
+            border-color: #007bff;
+            box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+        }
+
+        select option {
+            font-size: 16px;
+        }
+
+        #calendar {
+            max-width: 600px;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div id="left-section">
+        <h1>Price Analysis Tool</h1>
+
+        <label>Selecteer een hotel:</label>
+        <select id="hotelDropdown">
+            {% for hotel in hotels %}
+                <option value="{{ hotel }}">{{ hotel }}</option>
+            {% endfor %}
+        </select>
+
+        <label>Selecteer een kamertype:</label>
+        <select id="kamertypeDropdown">
+            {% for kamertype in kamertypes %}
+                <option value="{{ kamertype }}">{{ kamertype }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div id="right-section">
+        <div id="calendar"></div>
+    </div>
+
+    <script>
+        $(document).ready(function() {
+            // Initial values for hotel and kamertype
+            var selectedHotel = 'default_hotel';
+            var selectedKamertype = 'default_kamertype';
+        
+            // Function to fetch and update events based on hotel and kamertype
+            function updateCalendarEvents(hotel, kamertype) {
+                // Make a request to the server to get prices based on the selected hotel and kamertype
+                fetch(`/get_prices_by_date?hotel=${hotel}&kamertype=${kamertype}`)
+                    .then(response => response.json())
+                    .then(pricesByDate => {
+                        // Clear existing events
+                        $('#calendar').fullCalendar('removeEvents');
+        
+                        // Add new events based on the fetched prices
+                        for (const date in pricesByDate) {
+                            const price = pricesByDate[date];
+                            $('#calendar').fullCalendar('renderEvent', {
+                                title: '€' + price,
+                                start: date,
+                                end: date,
+                                price: price
+                            });
+                        }
+                    });
+            }
+        
+            // Initial update based on the default hotel and kamertype
+            updateCalendarEvents(selectedHotel, selectedKamertype);
+        
+            // Event listener for hotel dropdown change
+            $("#hotelDropdown").change(function() {
+                // Update events when hotel is changed
+                selectedHotel = $(this).val();
+                updateCalendarEvents(selectedHotel, selectedKamertype);
+            });
+        
+            // Event listener for kamertype dropdown change
+            $("#kamertypeDropdown").change(function() {
+                // Update events when kamertype is changed
+                selectedKamertype = $(this).val();
+                updateCalendarEvents(selectedHotel, selectedKamertype);
+            });
+        
+            // Configuratie-opties hier
+            $('#calendar').fullCalendar({
+                header: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'month'
+                },
+                // Voeg andere configuratie-opties toe zoals events, eventClick, etc.
+            });
+        });
+    </script>
+    
+</body>
+</html>
+

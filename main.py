@@ -1,20 +1,22 @@
 # import libraries
-from fastapi import FastAPI, Request, Query, Depends
+from fastapi import FastAPI, Request, Query, Depends, APIRouter
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
-from fastapi.responses import StreamingResponse, JSONResponse
+from fastapi.responses import StreamingResponse, JSONResponse, HTMLResponse
 from func_scraping import scrape_booking_data
 import pandas as pd
 import seaborn as sns
 import matplotlib.pyplot as plt
 import base64
 from io import BytesIO
-from datetime import datetime
+from datetime import datetime, timedelta, date
 from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.session import Session
 import os
+import calendar as cal_module
+from typing import Optional
 
 # Connect to MySQL database
 DATABASE_URL = "mysql+mysqlconnector://root:@localhost/scraping"
@@ -38,7 +40,14 @@ class HotelData(Base):
     beoordeling = Column(Float)
     last_execution_time = Column(DateTime)
 
+class Prijzen(Base):
+    __tablename__ = "prijzen"
 
+    id = Column(Integer, primary_key=True, index=True)
+    hotel = Column(String(255), index=True)
+    kamertype = Column(String(255))
+    prijs = Column(Float)
+    datum = Column(DateTime)
 
 Base.metadata.create_all(bind=engine)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
@@ -67,17 +76,34 @@ def get_db():
     finally:
         db.close()
 
+@app.get("/", response_class=HTMLResponse)
+async def show_form(request: Request):
+    return templates.TemplateResponse("startscraping.html", {"request": request})
     
-@app.get("/")
-async def root(request: Request):
-    global last_execution_time, last_execution_status, hotelgegevens, stad, checkin_datum, checkout_datum, num_volwassenen, num_kinderen, max_paginas
+@app.get("/scrapingresult")
+async def scrapingresult(
+    request: Request,
+    stad: Optional[str] = Query("Maastricht", description="The city name"),
+    checkin_datum: Optional[str] = Query("2024-01-28", description="Check-in date"),
+    num_volwassenen: Optional[int] = Query(2, description="Number of adults"),
+    num_kinderen: Optional[int] = Query(0, description="Number of children"),
+    max_paginas: Optional[int] = Query(2, description="Maximum pages to scrape"),
+):
+    global last_execution_time, last_execution_status, hotelgegevens
 
-    stad = 'Maastricht'
-    checkin_datum = '2024-01-28'
-    checkout_datum = '2024-01-29'
-    num_volwassenen = 2
-    num_kinderen = 0
-    max_paginas = 2
+    checkin_datum = datetime.strptime(checkin_datum, "%Y-%m-%d")
+    checkout_datum = (checkin_datum + timedelta(days=1))
+    checkin_datum = checkin_datum.strftime("%Y-%m-%d")
+    checkout_datum = checkout_datum.strftime("%Y-%m-%d")
+    # max_paginas = 2
+
+    # Use the user-provided values
+    stad = stad
+    checkin_datum = checkin_datum
+    checkout_datum = checkout_datum
+    num_volwassenen = num_volwassenen
+    num_kinderen = num_kinderen
+    max_paginas = max_paginas
 
     hotelgegevens = scrape_booking_data(stad, checkin_datum, checkout_datum, num_volwassenen, num_kinderen, max_paginas)
 
@@ -240,3 +266,65 @@ async def load_data(db: Session = Depends(get_db)):
         return JSONResponse(content={"message": "Data successfully loaded into the database."})
     else:
         return JSONResponse(content={"message": "No data available to load into the database."})
+    
+@app.get("/price_analysis", response_class=HTMLResponse)
+async def price_analysis(request: Request, db: Session = Depends(get_db)):
+    # Ophalen van unieke waarden voor hotels en kamertypes uit de tabel "prijzen"
+    hotels = db.query(Prijzen.hotel).distinct().all()
+    kamertypes = db.query(Prijzen.kamertype).distinct().all()
+
+    hotels = [hotel[0] for hotel in hotels]
+    kamertypes = [kamertype[0] for kamertype in kamertypes]
+
+    # Fetch prices from the database
+    prices = db.query(Prijzen.hotel, Prijzen.kamertype, Prijzen.prijs, Prijzen.datum).all()
+
+    # Organize prices by hotel and room type
+    prices_by_hotel_and_room = {}
+    for price in prices:
+        hotel = price[0]
+        kamertype = price[1]
+        prijs = price[2]
+        datum = price[3].strftime("%Y-%m-%d")
+
+        if hotel not in prices_by_hotel_and_room:
+            prices_by_hotel_and_room[hotel] = {}
+
+        if kamertype not in prices_by_hotel_and_room[hotel]:
+            prices_by_hotel_and_room[hotel][kamertype] = {}
+
+        prices_by_hotel_and_room[hotel][kamertype][datum] = prijs
+
+    return templates.TemplateResponse(
+        "price_analysis.html",
+        {"request": request, "hotels": hotels, "kamertypes": kamertypes, "prices_by_date": prices_by_hotel_and_room},
+    )
+
+router = APIRouter()
+
+# Define the new endpoint
+@router.get("/get_prices_by_date")
+async def get_prices_by_date(hotel: str, kamertype: str, db: Session = Depends(get_db)):
+    """
+    Endpoint to fetch prices based on the selected hotel and kamertype.
+
+    Parameters:
+    - hotel: The selected hotel from the dropdown.
+    - kamertype: The selected kamertype from the dropdown.
+
+    Returns:
+    - A JSON response containing prices by date.
+    """
+    prices_by_date = {}
+
+    # Query the database to get prices based on the selected hotel and kamertype
+    prices = db.query(Prijzen.datum, Prijzen.prijs).filter_by(hotel=hotel, kamertype=kamertype).all()
+
+    for date, price in prices:
+        # Format the date if needed
+        formatted_date = date.strftime("%Y-%m-%d")
+        prices_by_date[formatted_date] = price
+
+    return prices_by_date
+
+app.include_router(router)

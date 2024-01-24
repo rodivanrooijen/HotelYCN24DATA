@@ -76,6 +76,15 @@ def get_db():
     finally:
         db.close()
 
+def get_input_parameters(
+    stad: str = Query("Maastricht", description="The city name"),
+    checkin_datum: str = Query("2024-01-28", description="Check-in date"),
+    num_volwassenen: int = Query(2, description="Number of adults"),
+    num_kinderen: int = Query(0, description="Number of children"),
+    max_paginas: int = Query(2, description="Maximum pages to scrape"),
+):
+    return stad, checkin_datum, num_volwassenen, num_kinderen, max_paginas
+
 @app.get("/", response_class=HTMLResponse)
 async def show_form(request: Request):
     return templates.TemplateResponse("startscraping.html", {"request": request})
@@ -83,13 +92,12 @@ async def show_form(request: Request):
 @app.get("/scrapingresult")
 async def scrapingresult(
     request: Request,
-    stad: Optional[str] = Query("Maastricht", description="The city name"),
-    checkin_datum: Optional[str] = Query("2024-01-28", description="Check-in date"),
-    num_volwassenen: Optional[int] = Query(2, description="Number of adults"),
-    num_kinderen: Optional[int] = Query(0, description="Number of children"),
-    max_paginas: Optional[int] = Query(2, description="Maximum pages to scrape"),
+    input_params: tuple[str, str, int, int, int] = Depends(get_input_parameters),
 ):
     global last_execution_time, last_execution_status, hotelgegevens
+
+    # Extract values from the tuple
+    stad, checkin_datum, num_volwassenen, num_kinderen, max_paginas = input_params
 
     checkin_datum = datetime.strptime(checkin_datum, "%Y-%m-%d")
     checkout_datum = (checkin_datum + timedelta(days=1))
@@ -227,8 +235,14 @@ async def save_data():
         return {"message": "Geen data beschikbaar om op te slaan."}
     
 @app.post("/load_data")
-async def load_data(db: Session = Depends(get_db)):
-    global hotelgegevens, stad, checkin_datum, checkout_datum, num_volwassenen, num_kinderen, max_paginas
+async def load_data(
+    input_params: tuple[str, str, int, int, int] = Depends(get_input_parameters),
+    db: Session = Depends(get_db)
+):
+    global hotelgegevens
+
+    # Extract values from the tuple
+    stad, checkin_datum, num_volwassenen, num_kinderen, max_paginas = input_params
 
     if hotelgegevens is not None and not hotelgegevens.empty:
         for _, row in hotelgegevens.iterrows():

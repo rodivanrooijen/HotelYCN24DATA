@@ -77,11 +77,11 @@ def get_db():
         db.close()
 
 def get_input_parameters(
-    stad: str = Query("Maastricht", description="The city name"),
-    checkin_datum: str = Query("2024-01-28", description="Check-in date"),
-    num_volwassenen: int = Query(2, description="Number of adults"),
-    num_kinderen: int = Query(0, description="Number of children"),
-    max_paginas: int = Query(2, description="Maximum pages to scrape"),
+    stad: str = Query(..., description="The city name"),
+    checkin_datum: str = Query(..., description="Check-in date"),
+    num_volwassenen: int = Query(..., description="Number of adults"),
+    num_kinderen: int = Query(..., description="Number of children"),
+    max_paginas: int = Query(..., description="Maximum pages to scrape"),
 ):
     return stad, checkin_datum, num_volwassenen, num_kinderen, max_paginas
 

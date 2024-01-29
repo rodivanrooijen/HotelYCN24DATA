@@ -1,7 +1,10 @@
 fastapi
 uvicorn
-jinja2
-func-scraping
-pandas
-seaborn
+Jinja2
+sqlalchemy
 matplotlib
+seaborn
+pandas
+requests
+beautifulsoup4
+mysql-connector-python

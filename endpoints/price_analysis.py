@@ -12,9 +12,6 @@ from supporting_scripts.db_connection import get_db, HotelData, Prijzen
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
 
-
-
-
 @router.get("/price_analysis", response_class=HTMLResponse)
 async def price_analysis(request: Request, db: Session = Depends(get_db)):
     # Ophalen van unieke waarden voor hotels en kamertypes uit de tabel "prijzen"

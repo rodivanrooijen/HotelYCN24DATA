@@ -125,3 +125,8 @@ footer {
 .footer-box {
     margin-top: auto;
 }
+
+.button-box {
+    margin: 10px 0;
+    width: 50%;
+}

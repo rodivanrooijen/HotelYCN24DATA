@@ -3,6 +3,6 @@ venv/
 *.csv
 __pycache__/
 *.pyc
-eurodata/
+eurodata_csv/
 csv_data
 bookings/

@@ -10,25 +10,14 @@ from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.session import Session
-from start_scraping import get_input_parameters
 from datetime import datetime, timedelta
 import pandas as pd
 import os
 
-
-from func_scraping import scrape_booking_data
+from supporting_scripts import func_scraping, definitions_list
 
 router = APIRouter()
 templates = Jinja2Templates(directory="templates")
-
-def get_input_parameters(
-    stad: str = Query("Maastricht", description="The city name"),
-    checkin_datum: str = Query("2024-01-30", description="Check-in date"),
-    num_volwassenen: int = Query(2, description="Number of adults"),
-    num_kinderen: int = Query(0, description="Number of children"),
-    max_paginas: int = Query(2, description="Maximum pages to scrape"),
-):
-    return stad, checkin_datum, num_volwassenen, num_kinderen, max_paginas
 
 # Connect to MySQL database
 DATABASE_URL = "mysql+mysqlconnector://root:@localhost/scraping"
@@ -75,7 +64,7 @@ def get_db():
 @router.get("/scrapingresult")
 async def scrapingresult(
     request: Request,
-    input_params: tuple[str, str, int, int, int] = Depends(get_input_parameters),
+    input_params: tuple[str, str, int, int, int] = Depends(definitions_list.get_input_parameters),
 ):
     global last_execution_time, last_execution_status, hotelgegevens, stad, checkin_datum, checkout_datum, num_volwassenen, num_kinderen, max_paginas
 
@@ -96,7 +85,7 @@ async def scrapingresult(
     num_kinderen = num_kinderen
     max_paginas = max_paginas
 
-    hotelgegevens = scrape_booking_data(stad, checkin_datum, checkout_datum, num_volwassenen, num_kinderen, max_paginas)
+    hotelgegevens = func_scraping.scrape_booking_data(stad, checkin_datum, checkout_datum, num_volwassenen, num_kinderen, max_paginas)
 
     hotelgegevens['naam'] = hotelgegevens['naam'].astype(str)
     hotelgegevens['locatie'] = hotelgegevens['locatie'].astype(str)
@@ -219,7 +208,7 @@ async def save_data():
     
 @router.post("/load_data")
 async def load_data(
-    input_params: tuple[str, str, int, int, int] = Depends(get_input_parameters),
+    input_params: tuple[str, str, int, int, int] = Depends(definitions_list.get_input_parameters),
     db: Session = Depends(get_db)
 ):
     global hotelgegevens

@@ -10,6 +10,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.1/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.js"></script>
     
+    
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -17,31 +18,42 @@
             margin: 0;
             padding: 0;
             display: flex;
-            height: 100vh;
+            flex-direction: column;
+            align-items: center; /* Center content horizontally */
+            min-height: 100vh; /* Ensure the body takes up at least the full height of the viewport */
         }
 
+        .header {
+            margin-top: 1vh;
+            text-align: center;
+        }
+
+        .container {
+            display: flex;
+            margin-top: 5vh;
+        }
+
+        /* Added styles for dropdown menus */
         #left-section {
             flex: 1;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: flex-start;
-            padding: 20px;
-            margin-top: 1vh;
         }
 
         #right-section {
             flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: left;
-            justify-content: flex-start;
             padding: 20px;
-            margin-top: 5vh;
+            max-width: 600px; /* Set maximum width for the right section */
+            width: 100%; /* Ensure the right section takes up the available width */
+            overflow: auto; /* Enable scrolling if content overflows */
         }
 
         h1 {
-            margin-bottom: 50px;
+            color: rgb(17, 81, 102); /* Change to your preferred color */
+            font-family: 'Lobster', cursive;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
 
         select {
@@ -74,29 +86,66 @@
             max-width: 600px;
             width: 100%;
         }
+
+            
+        footer {
+            background-color: #f4f4f4;
+            padding: 10px;
+            text-align: center;
+            margin-top: 20vh; /* Push footer to the bottom */
+            width: 100%; /* Ensure footer spans the entire width */
+        }
+
+        .footer-box {
+            text-align: center;
+            display: inline-block; /* Ensures center alignment */
+        }
+
+        .footer-content {
+            display: inline-block; /* Ensures center alignment */
+        }
+
+        button {
+            background-color: rgb(17, 81, 102);
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+
+        button:hover {
+            background-color: rgb(12, 62, 80);
+        }
     </style>
 </head>
 <body>
-    <div id="left-section">
+    <div class="header">
         <h1>Price Analysis Tool</h1>
-
-        <label>Selecteer een hotel:</label>
-        <select id="hotelDropdown">
-            {% for hotel in hotels %}
-                <option value="{{ hotel }}">{{ hotel }}</option>
-            {% endfor %}
-        </select>
-
-        <label>Selecteer een kamertype:</label>
-        <select id="kamertypeDropdown">
-            {% for kamertype in kamertypes %}
-                <option value="{{ kamertype }}">{{ kamertype }}</option>
-            {% endfor %}
-        </select>
     </div>
+    <div class="container">
+        <div id="left-section">
+            
 
-    <div id="right-section">
-        <div id="calendar"></div>
+            <label>Selecteer een hotel:</label>
+            <select id="hotelDropdown">
+                {% for hotel in hotels %}
+                    <option value="{{ hotel }}">{{ hotel }}</option>
+                {% endfor %}
+            </select>
+
+            <label>Selecteer een kamertype:</label>
+            <select id="kamertypeDropdown">
+                {% for kamertype in kamertypes %}
+                    <option value="{{ kamertype }}">{{ kamertype }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        <div id="right-section">
+            <div id="calendar"></div>
+        </div>
     </div>
 
     <script>
@@ -155,6 +204,15 @@
             });
         });
     </script>
+    <footer>
+        <div class="footer-box">
+            <div class="footer-content"> <!-- Added container for footer content -->
+                <button onclick="window.location.href='/'">Start scraping</button>
+                <button onclick="window.location.href='/price_analysis'">Go to Price Analysis</button>
+                <p>© 2024 - Booking.com Web Scraping</p>
+            </div>
+        </div>
+    </footer>
     
 </body>
 </html>

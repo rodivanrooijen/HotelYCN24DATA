@@ -1,22 +1,21 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <!-- Your existing head content -->
-
-    <title>Datum en Gegevens Keuzemenu</title>
+    <title>Start Scraping</title>
     <link rel="stylesheet" type="text/css" href="{{ url_for('static', path='styles.css') }}">
 </head>
 <body>
-    <h1>Kies een datum en voer gegevens in:</h1>
+    <h1>Booking.com scraping</h1>
+    <p>Choose the desired input parameters:</p>
 
     <form id="dataForm" action="/" method="POST" enctype="application/x-www-form-urlencoded">
-        <label for="stad">Stad:</label>
+        <label for="stad">City:</label>
         <input type="text" id="stad" name="stad" value="Maastricht">
         
         <br>
         <br>
 
-        <label for="datum">Datum prijs checken:</label>
+        <label for="datum">Check prices for the following date:</label>
         <input type="date" id="datum" name="datum">
 
         <script>
@@ -27,26 +26,26 @@
         <br>
         <br>
 
-        <label for="volwassenen">Aantal volwassenen:</label>
+        <label for="volwassenen">Number of adults:</label>
         <input type="number" id="volwassenen" name="volwassenen" min="1" value="2">
         
         <br>
         <br>
 
-        <label for="kinderen">Aantal kinderen:</label>
+        <label for="kinderen">Number of children:</label>
         <input type="number" id="kinderen" name="kinderen" min="0" value="0">
 
         <br>
         <br>
 
-        <label for="paginas">Aantal pagina's: (2 aanbevolen):</label>
+        <label for="paginas">Number of pages to be scraped: (2 recommended):</label>
         <input type="number" id="paginas" name="paginas" min="1" value="2" max ="5">
 
         <br>
         <br>
 
         <!-- Use type="button" to prevent form submission -->
-        <button type="button" onclick="submitForm()">Toon geselecteerde gegevens</button>
+        <button type="button" onclick="submitForm()">Submit the input</button>
     </form>
 
     <script>

@@ -13,7 +13,7 @@
     
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto', sans-serif;
             background-color: #f4f4f4;
             margin: 0;
             padding: 0;
@@ -52,7 +52,6 @@
 
         h1 {
             color: rgb(17, 81, 102); /* Change to your preferred color */
-            font-family: 'Lobster', cursive;
             text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
         }
 
@@ -87,12 +86,12 @@
             width: 100%;
         }
 
-            
+           
         footer {
             background-color: #f4f4f4;
-            padding: 10px;
+            padding: 20px;
             text-align: center;
-            margin-top: 20vh; /* Push footer to the bottom */
+            margin-top: auto; /* Push footer to the bottom */
             width: 100%; /* Ensure footer spans the entire width */
         }
 
@@ -106,7 +105,7 @@
         }
 
         button {
-            background-color: rgb(17, 81, 102);
+            background-color: rgb(36, 138, 172);
             color: #fff;
             border: none;
             padding: 10px 20px;
@@ -116,9 +115,7 @@
             transition: background-color 0.3s;
         }
 
-        button:hover {
-            background-color: rgb(12, 62, 80);
-        }
+
     </style>
 </head>
 <body>
@@ -150,65 +147,71 @@
 
     <script>
         $(document).ready(function() {
-            // Initial values for hotel and kamertype
-            var selectedHotel = 'default_hotel';
-            var selectedKamertype = 'default_kamertype';
-        
             // Function to fetch and update events based on hotel and kamertype
             function updateCalendarEvents(hotel, kamertype) {
-                // Make a request to the server to get prices based on the selected hotel and kamertype
-                fetch(`/get_prices_by_date?hotel=${hotel}&kamertype=${kamertype}`)
-                    .then(response => response.json())
-                    .then(pricesByDate => {
-                        // Clear existing events
-                        $('#calendar').fullCalendar('removeEvents');
-        
-                        // Add new events based on the fetched prices
-                        for (const date in pricesByDate) {
-                            const price = pricesByDate[date];
-                            $('#calendar').fullCalendar('renderEvent', {
-                                title: '€' + price,
-                                start: date,
-                                end: date,
-                                price: price
-                            });
-                        }
-                    });
+                // Make a request to the server to get prices and average prices based on the selected hotel and kamertype
+                Promise.all([
+                    fetch(`/get_prices_by_date?hotel=${hotel}&kamertype=${kamertype}`).then(response => response.json()),
+                    fetch("/get_avg_prices_by_date").then(response => response.json())
+                ]).then(([pricesByDate, avgPricesByDate]) => {
+                    // Clear existing events
+                    $('#calendar').fullCalendar('removeEvents');
+
+                    
+
+                    // Add new events based on the fetched average prices
+                    for (const date in avgPricesByDate) {
+                        const avgPrice = avgPricesByDate[date];
+                        $('#calendar').fullCalendar('renderEvent', {
+                            title: '€' + avgPrice,
+                            start: date,
+                            end: date,
+                            avgPrice: avgPrice,
+                            color: 'orange'
+                        });
+                    }
+                    // Add new events based on the fetched prices
+                    for (const date in pricesByDate) {
+                        const price = pricesByDate[date];
+                        $('#calendar').fullCalendar('renderEvent', {
+                            title: '€' + price,
+                            start: date,
+                            end: date,
+                            price: price,
+                            color: 'lightblue'
+                        });
+                    }
+                });
             }
-        
-            // Initial update based on the default hotel and kamertype
-            updateCalendarEvents(selectedHotel, selectedKamertype);
-        
-            // Event listener for hotel dropdown change
-            $("#hotelDropdown").change(function() {
-                // Update events when hotel is changed
-                selectedHotel = $(this).val();
+
+            // Event listeners for dropdown changes
+            $("#hotelDropdown, #kamertypeDropdown").change(function() {
+                const selectedHotel = $("#hotelDropdown").val();
+                const selectedKamertype = $("#kamertypeDropdown").val();
                 updateCalendarEvents(selectedHotel, selectedKamertype);
             });
-        
-            // Event listener for kamertype dropdown change
-            $("#kamertypeDropdown").change(function() {
-                // Update events when kamertype is changed
-                selectedKamertype = $(this).val();
-                updateCalendarEvents(selectedHotel, selectedKamertype);
-            });
-        
-            // Configuratie-opties hier
+
+            // Calendar configuration options
             $('#calendar').fullCalendar({
                 header: {
                     left: 'prev,next today',
                     center: 'title',
                     right: 'month'
-                },
-                // Voeg andere configuratie-opties toe zoals events, eventClick, etc.
+                }
+                // Add other configuration options as needed
             });
+
+            // Initial update based on the default hotel and kamertype
+            const selectedHotel = $("#hotelDropdown").val();
+            const selectedKamertype = $("#kamertypeDropdown").val();
+            updateCalendarEvents(selectedHotel, selectedKamertype);
         });
+
     </script>
     <footer>
         <div class="footer-box">
             <div class="footer-content"> <!-- Added container for footer content -->
-                <button onclick="window.location.href='/'">Start scraping</button>
-                <button onclick="window.location.href='/price_analysis'">Go to Price Analysis</button>
+                <button onclick="window.location.href='/start_scraping'">Start scraping</button>
                 <p>© 2024 - Booking.com Web Scraping</p>
             </div>
         </div>

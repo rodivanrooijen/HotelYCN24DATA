@@ -1,11 +1,11 @@
 from fastapi import APIRouter, Depends, Request
 from fastapi.templating import Jinja2Templates
 from fastapi.responses import HTMLResponse
-from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime
+from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, func
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.session import Session
-from datetime import datetime
+from datetime import date, datetime
 
 from supporting_scripts.db_connection import get_db, HotelData, Prijzen
 
@@ -69,3 +69,28 @@ async def get_prices_by_date(hotel: str, kamertype: str, db: Session = Depends(g
         prices_by_date[formatted_date] = price
 
     return prices_by_date
+
+# Endpoint to fetch average prices per date from the HotelData table
+@router.get("/get_avg_prices_by_date")
+async def get_avg_prices_by_date(db: Session = Depends(get_db)):
+    """
+    Endpoint to fetch average prices per date from the HotelData table.
+
+    Returns:
+    - A JSON response containing average prices by date.
+    """
+    avg_prices_by_date = {}
+
+    # Query the database to get average prices per date
+    avg_prices = db.query(func.date(HotelData.checkin_datum), func.avg(HotelData.prijs)).group_by(func.date(HotelData.checkin_datum)).all()
+
+    for date_str, avg_price in avg_prices:
+        # Convert string date to datetime object
+        if isinstance(date_str, date):  # Check if date_str is already a date object
+            formatted_date = date_str.strftime("%Y-%m-%d")
+        else:
+            formatted_date = datetime.strptime(date_str, "%Y-%m-%d").date().strftime("%Y-%m-%d")
+
+        avg_prices_by_date[formatted_date] = avg_price
+
+    return avg_prices_by_date

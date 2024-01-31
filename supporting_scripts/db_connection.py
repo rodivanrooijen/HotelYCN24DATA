@@ -3,8 +3,22 @@ from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.session import Session
+import urllib.parse
 
-DATABASE_URL = "mysql+mysqlconnector://root:@localhost/scraping"
+# Azure MySQL connection details
+azure_host = "yc2401data.mysql.database.azure.com"
+azure_username = "yc2401"
+azure_password = "abcd1234ABCD!@#$"
+azure_database = "scraping"
+
+# Construct Azure connection URL
+azure_connection_url = f"mysql+mysqlconnector://{azure_username}:{urllib.parse.quote_plus(azure_password)}@{azure_host}/{azure_database}"
+
+# Replace existing URL with Azure connection URL
+DATABASE_URL = azure_connection_url
+
+# Local database
+#DATABASE_URL = "mysql+mysqlconnector://root:@localhost/scraping"
 
 # Database setup using SQLite (you can replace it with your preferred database)
 engine = create_engine(DATABASE_URL)

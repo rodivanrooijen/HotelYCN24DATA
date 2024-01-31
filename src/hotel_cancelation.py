@@ -1,10 +1,8 @@
 import pandas as pd
-import logging
 import plotly.express as px
 import string
 import numpy as np
 
-logging.basicConfig(level=10)
 
 import sort_dataframeby_monthorweek as sd
 import mysql.connector
@@ -27,19 +25,16 @@ def sort_month(df, column_name):
 
 def main(show=False) -> None:
     df: pd.DataFrame = pd.read_csv("hotel_bookings.csv")
-    logging.info(df.info())
     null = pd.DataFrame(
         {
             "Null Values": df.isna().sum(),
             "Percentage Null Values": (df.isna().sum()) / (df.shape[0]) * (100),
         }
     )
-    logging.info(null)
     df.fillna(0, inplace=True)
 
     df = df[~((df["children"] == 0) & (df["adults"] == 0) & (df["babies"] == 0))]
 
-    logging.info(df.head())
     df["guest_count"] = (df["adults"] + df["children"] + df["babies"]).astype(int)
 
     df["total_nights"] = (
@@ -117,7 +112,6 @@ def main(show=False) -> None:
         df_resort_guest_count_month, how="inner", on="arrival_date_month"
     )
 
-    logging.info(df_guest_count_month)
 
     df_stay_count = (
         df[(df["is_canceled"] == 0)]
@@ -125,12 +119,10 @@ def main(show=False) -> None:
         .size()
         .reset_index(name="stay_count")
     )
-    logging.info(df_stay_count)
 
     df_correlation: pd.DataFrame = (
         df.corr(numeric_only=True)["is_canceled"].abs().sort_values(ascending=False)
     )
-    logging.info(df_correlation)
 
     if show:
         guests_map = px.choropleth(
@@ -303,7 +295,6 @@ def hotel_bookings():
 
     df = df[~((df["children"] == 0) & (df["adults"] == 0) & (df["babies"] == 0))]
 
-    logging.info(df.head())
     df["children"] = (df["children"] + df["babies"]).astype(int)
 
     df.drop(

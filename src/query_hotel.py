@@ -1,10 +1,8 @@
 import pandas as pd
-import logging
 import mysql.connector
 from mysql.connector import errorcode
 from cursor import MyCursor
 
-logging.basicConfig(level=10)
 def create_database(cursor, db_name):
     try:
         cursor.execute(
@@ -213,7 +211,6 @@ def create_db():
     
 def main():
     df = pd.read_csv("Lijst_hotels_MRA_2012.csv", sep=";")
-    logging.info(df.info())
     df_hotel = df[["hotel_naam_2012", "straat", "postcode", "huisnummer", "plaats"]]
     df_hotel = df_hotel.rename(
         columns={
@@ -225,7 +222,6 @@ def main():
         }
     )
     df_hotel["country"] = "Netherlands"
-    logging.info(df_hotel)
     
     mydb = mysql.connector.connect(
         host="localhost",  # port erbij indien mac

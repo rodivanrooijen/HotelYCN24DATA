@@ -2,6 +2,7 @@ import pandas as pd
 import logging
 import mysql.connector
 from mysql.connector import errorcode
+from cursor import MyCursor
 
 logging.basicConfig(level=10)
 def create_database(cursor, db_name):
@@ -13,7 +14,7 @@ def create_database(cursor, db_name):
         exit(1)
         
 def create_db():
-    db_name = "hotel_project_yc_2401"
+    db_name = "test2"
     
     tables = {}
     
@@ -169,41 +170,46 @@ def create_db():
         "FOREIGN KEY (`place_of_interest_id`) REFERENCES `place_of_interest`(`place_of_interest_id`)"
         ") ENGINE=InnoDB")
     
-    mydb = mysql.connector.connect(
-        host="localhost",  # port erbij indien mac
-        user="root",
-        password="",
-    )
-
-    mycursor = mydb.cursor()
+    # mydb = mysql.connector.connect(
+    #     host="localhost",  # port erbij indien mac
+    #     user="root",
+    #     password="",
+    # )
+    c1 = MyCursor()
+    
+    mydb = c1.get_mydb()
+    mycursor = c1.get_mycursor()
+    # mycursor = mydb.cursor()
+    print(type(mycursor))
+    print(type(mydb))
     try:
         mycursor.execute("USE {}".format(db_name))
     except mysql.connector.Error as err:
         print("Database {} does not exists.".format(db_name))
-        if err.errno == errorcode.ER_BAD_DB_ERROR:
-            create_database(mycursor, db_name)
-            print("Database {} created successfully.".format(db_name))
-            mydb.database = db_name
-        else:
-            print(err)
-            exit(1)
-    for table_name in tables:
-        table_description = tables[table_name]
-        try:
-            print("Creating table {}: ".format(table_name), end='')
-            mycursor.execute(table_description)
-        except mysql.connector.Error as err:
-            if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
-                print("already exists.")
-            else:
-                print(err.msg)
-        else:
-            print("OK")
+    #     if err.errno == errorcode.ER_BAD_DB_ERROR:
+    #         create_database(mycursor, db_name)
+    #         print("Database {} created successfully.".format(db_name))
+    #         mydb.database = db_name
+    #     else:
+    #         print(err)
+    #         exit(1)
+    # for table_name in tables:
+    #     table_description = tables[table_name]
+    #     try:
+    #         print("Creating table {}: ".format(table_name), end='')
+    #         mycursor.execute(table_description)
+    #     except mysql.connector.Error as err:
+    #         if err.errno == errorcode.ER_TABLE_EXISTS_ERROR:
+    #             print("already exists.")
+    #         else:
+    #             print(err.msg)
+    #     else:
+            # print("OK")
 
-    mycursor.close()
-    mydb.close()
+    # mycursor.close()
+    # mydb.close()
     
-    
+
     
 def main():
     df = pd.read_csv("Lijst_hotels_MRA_2012.csv", sep=";")
@@ -242,4 +248,4 @@ def main():
     mydb.close()
 
 if __name__ == "__main__":
-    main()
+    create_db()

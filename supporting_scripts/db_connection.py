@@ -1,15 +1,18 @@
 
-from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime
+from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, Double
+from datetime import datetime
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.orm.session import Session
 import urllib.parse
+from typing import Union
+from pydantic import BaseModel
 
 # Azure MySQL connection details
 azure_host = "yc2401data.mysql.database.azure.com"
 azure_username = "yc2401"
 azure_password = "abcd1234ABCD!@#$"
-azure_database = "scraping"
+azure_database = "hotel"
 
 # Construct Azure connection URL
 azure_connection_url = f"mysql+mysqlconnector://{azure_username}:{urllib.parse.quote_plus(azure_password)}@{azure_host}/{azure_database}"
@@ -47,6 +50,36 @@ class Prijzen(Base):
     kamertype = Column(String(255))
     prijs = Column(Float)
     datum = Column(DateTime)
+
+
+class LocationRating(Base):
+    __tablename__ = "LocationRating"
+
+    ID = Column(Integer, primary_key=True, index=True)
+    Nuts2Code = Column(String(255))
+    Country = Column(String(255))
+    LocationName = Column(String(255))
+    NumAccoms = Column(Double)
+    NetOccupancyRate = Column(Double)
+    ArrivalsAccommodation = Column(Double)
+    ExpenditureAccomodation = Column(Double)
+    ExpenditureTrip = Column(Double)
+    HicpCountry = Column(Double)
+    LastUpdated  = Column(DateTime, default=datetime.utcnow)
+
+
+# Define the Pydantic model for request data
+class LocationRatingCreate(BaseModel):
+    nuts_2_code: Union[str, None] = None
+    country: Union[str, None] = None
+    location_name: Union[str, None] = None
+    num_accoms: Union[float, None] = None
+    net_ccupancy_rate: Union[float, None] = None
+    arrivals_accommodation: Union[float, None] = None
+    expenditure_accomodation: Union[float, None] = None
+    expenditure_trip: Union[float, None] = None
+    hicp_country: Union[float, None] = None
+    last_updated: datetime
 
 Base.metadata.create_all(bind=engine)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)

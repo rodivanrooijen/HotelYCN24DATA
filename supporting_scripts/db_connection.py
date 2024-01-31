@@ -1,8 +1,7 @@
 
-from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime, Double
+from sqlalchemy import create_engine, Column, Integer, String, Float, DateTime
 from datetime import datetime
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import sessionmaker, declarative_base
 from sqlalchemy.orm.session import Session
 import urllib.parse
 from typing import Union
@@ -16,7 +15,7 @@ azure_database = "hotel"
 
 # Construct Azure connection URL
 azure_connection_url = f"mysql+mysqlconnector://{azure_username}:{urllib.parse.quote_plus(azure_password)}@{azure_host}/{azure_database}"
-
+print(azure_connection_url)
 # Replace existing URL with Azure connection URL
 DATABASE_URL = azure_connection_url
 
@@ -59,12 +58,12 @@ class LocationRating(Base):
     Nuts2Code = Column(String(255))
     Country = Column(String(255))
     LocationName = Column(String(255))
-    NumAccoms = Column(Double)
-    NetOccupancyRate = Column(Double)
-    ArrivalsAccommodation = Column(Double)
-    ExpenditureAccomodation = Column(Double)
-    ExpenditureTrip = Column(Double)
-    HicpCountry = Column(Double)
+    NumAccoms = Column(Float)
+    NetOccupancyRate = Column(Float)
+    ArrivalsAccommodation = Column(Float)
+    ExpenditureAccomodation = Column(Float)
+    ExpenditureTrip = Column(Float)
+    HicpCountry = Column(Float)
     LastUpdated  = Column(DateTime, default=datetime.utcnow)
 
 

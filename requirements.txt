@@ -12,3 +12,7 @@ fastapi
 uvicorn[standard]
 databases
 sqlalchemy
+
+
+
+beautifulsoup4

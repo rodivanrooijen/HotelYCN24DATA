@@ -17,3 +17,4 @@ pyodbc
 bs4
 pydantic
 azure-identity
+python-dotenv

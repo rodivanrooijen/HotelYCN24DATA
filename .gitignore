@@ -6,3 +6,4 @@ __pycache__/
 eurodata_csv/
 csv_data
 bookings/
+.env

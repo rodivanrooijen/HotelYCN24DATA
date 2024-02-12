@@ -3,7 +3,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 
 # import routers
-from endpoints import start_scraping, scraping_result, price_analysis, location_rating
+from endpoints import start_scraping, scraping_result, price_analysis, location_rating, get_key
 
 app = FastAPI()
 @app.get("/")
@@ -33,3 +33,5 @@ app.include_router(
 app.include_router(
     location_rating.router
 )
+
+app.include_router(get_key.router)
